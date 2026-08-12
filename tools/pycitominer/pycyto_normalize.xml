@@ -1,0 +1,95 @@
+<tool id="pycytominer_normalize" name="Normalize" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+    <description>with Pycytominer</description>
+    <macros>
+        <import>creators.xml</import>
+        <token name="@TOOL_VERSION@">1.6.1</token>
+        <token name="@VERSION_SUFFIX@">0</token>
+    </macros>
+    <creator>
+        <expand macro="creators/rmassei"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="1.6.1">pycytominer</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+mkdir pycytominer_output &&
+
+## Since the strata are input as integers, they need to be converted in a a comma separated string
+columns_headers=`head -n1 "$profiles" | cut -d, -f'$column'` &&
+
+pycytominer normalize
+--profiles '$profiles'
+--output_file './pycytominer_output/output.csv'
+--output_type 'csv'
+#if str($treatment) != 'all'
+    --samples "\$columns_headers == '$treatment'"
+#else
+    --samples 'all'
+#end if
+--method '$method'
+
+&& cp './pycytominer_output/output.csv' '$output'
+
+
+    ]]></command>
+    <inputs>
+        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after annotation with treatments"/>
+        <param name="column" type="data_column"  format="csv" 
+            label="Column with normalization values"
+            help="Column containing the values to use for normalized (i.e. Metadata_treatment)"
+            data_ref="profiles" 
+            use_header_names="true"/>
+        <param name="treatment" type="text" label="Value" help="Wich value to use for normalized (i.e. DMSO, Control)"/>
+        <param name="method" type="select" label="Normalization Method">
+            <option value="standardize" selected="true">Standardize</option>
+            <option value="robustize">Robustize</option>
+            <option value="spherize">Spherize</option>
+            <option value="all">All</option>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="profiles" value="03_annotate_plate.csv" ftype="csv"/>
+            <param name="column" value="1"/>
+            <param name="treatment" value="DMSO"/>
+            <param name="method" value="standardize"/>
+            <output name="output" file="04_normalize_stand.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_columns n="18" sep=","/>
+                </assert_contents>
+            </output>
+        </test>
+        <test>
+            <param name="profiles" value="03_annotate_plate.csv" ftype="csv"/>
+            <param name="column" value="1"/>
+            <param name="treatment" value="all"/>
+            <param name="method" value="standardize"/>
+            <output name="output" file="04_normalize_all.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_columns n="18" sep=","/>
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+    **What it does**
+
+    **Pycytominer normalize** scales features to a common range and limits plate-to-plate technical variation. 
+    Z-scoring against DMSO control wells is the most common approach.
+
+    - Use **all** to normalize against the entire plate
+
+    - **Normalization method:** standardize (z-score, default), robustize (MAD-based), or spherize
+
+    Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+
+    ]]></help>
+    <citations>
+        <citation type="doi">10.1186/s13059-023-03019-3</citation>
+    </citations>
+</tool>

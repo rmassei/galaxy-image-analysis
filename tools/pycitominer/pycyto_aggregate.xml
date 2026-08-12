@@ -1,0 +1,82 @@
+<tool id="pycytominer_aggregate" name="Aggregate" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+    <description>with Pycytominer</description>
+    <macros>
+        <import>creators.xml</import>
+        <token name="@TOOL_VERSION@">1.6.1</token>
+        <token name="@VERSION_SUFFIX@">0</token>
+    </macros>
+    <creator>
+        <expand macro="creators/rmassei"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="1.6.1">pycytominer</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+mkdir pycytominer_output &&
+
+## Since the strata headers are input as integers, they need to be converted in a a comma separated string
+columns_headers=`head -n1 "$profiles" | cut -d, -f"$strata"` &&
+
+pycytominer aggregate
+--profiles '$profiles'
+--output_file './pycytominer_output/output.csv'
+--output_type 'csv'
+--strata "\$columns_headers"
+--operation '$operation'
+
+&& cp './pycytominer_output/output.csv' '$output'
+    ]]></command>
+    <inputs>
+    <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
+    <param name="strata" type="data_column" format="csv"
+        label="Aggregation columns"
+        help="Select column names to aggregate by (i.e. Metadata_Plate, Metadata_Well)"
+        data_ref="profiles" 
+        multiple="true" 
+        use_header_names="true"/>
+    <param name="operation" type="select" label="Aggregation function">
+        <option value="median" selected="true">Median</option>
+        <option value="mean">Mean</option>
+    </param>
+    </inputs>
+    <outputs>
+        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="profiles" value="01_single_cells.csv" ftype="csv"/>
+            <param name="strata" value="1,2"/>
+            <param name="operation" value="median"/>
+            <output name="output" file="02_aggregate_median.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_lines n="7"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test>
+            <param name="profiles" value="01_single_cells.csv" ftype="csv"/>
+            <param name="strata" value="1,2"/>
+            <param name="operation" value="mean"/>
+                        <output name="output" file="02_aggregate_mean.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_Plate"/>
+                    <has_n_lines n="7"/>
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+
+**What it does**
+
+**Pycytominer aggregate** collapses single-cell rows into one representative profile per well by 
+taking the median (or mean) of each feature across all cells in that well.
+
+Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+
+    ]]></help>
+    <citations>
+        <citation type="doi">10.1186/s13059-023-03019-3</citation>
+    </citations>
+</tool>

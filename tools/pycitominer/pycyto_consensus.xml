@@ -1,0 +1,77 @@
+<tool id="pycytominer_consensus" name="Consensus" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+    <description>with Pycytominer</description>
+    <macros>
+        <import>creators.xml</import>
+        <token name="@TOOL_VERSION@">1.6.1</token>
+        <token name="@VERSION_SUFFIX@">0</token>
+    </macros>
+    <creator>
+        <expand macro="creators/rmassei"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="1.6.1">pycytominer</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+mkdir pycytominer_output &&
+
+## Since the strata are input as integers, they need to be converted in a a comma separated string
+columns_headers=`head -n1 "$profiles" | cut -d, -f'$replicate_columns'` &&
+    
+pycytominer consensus
+
+--profiles '$profiles'
+--output_file './pycytominer_output/output.csv'
+--output_type 'csv'
+--operation '$operation'
+--replicate_columns "\$columns_headers"
+
+&& cp './pycytominer_output/output.csv' '$output'
+
+    ]]></command>
+    <inputs>
+        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after feature selection"/>
+        <param name="replicate_columns" type="data_column"  format="csv" 
+            label="Column with unique condition"
+            help="Select column with the unique condition, meaning where replicates share all of these values"
+            multiple="true"
+            data_ref="profiles" 
+            use_header_names="true"/>
+        <param name="operation"
+            type="select"
+            label="Select operations"
+            help="List of operation to apply to the cell-profiling table">
+        <option value="median">Median</option>
+        <option value="mean">Mean</option>
+        <option value="modz">Moderated z-score</option>
+    </param>
+    </inputs>
+    <outputs>
+        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="profiles" value="05_feature_selected.csv" ftype="csv"/>
+            <param name="replicate_columns" value="1,2,3"/>
+            <param name="operation" value="median"/>
+            <output name="output" file="06_consensus.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_treatment"/>
+                    <has_n_lines n="4"/>
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+
+    **What it does**
+
+    **Pycytominer consensus** collapses replicate wells into one profile per biological condition by taking the median (or modz) across replicates.
+    
+    - **median**, **mean**, or **Moderated z-score** (recommended for large screens)
+
+
+    ]]></help>
+    <citations>
+        <citation type="doi">10.1186/s13059-023-03019-3</citation>
+    </citations>
+</tool>

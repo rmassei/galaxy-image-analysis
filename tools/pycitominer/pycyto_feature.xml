@@ -1,0 +1,78 @@
+<tool id="pycytominer_feature_select" name="Select features" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+    <description>with Pycytominer</description>
+    <macros>
+        <import>creators.xml</import>
+        <token name="@TOOL_VERSION@">1.6.1</token>
+        <token name="@VERSION_SUFFIX@">0</token>
+    </macros>
+    <creator>
+        <expand macro="creators/rmassei"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="1.6.1">pycytominer</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+mkdir pycytominer_output &&
+    
+pycytominer feature_select
+
+--profiles '$profiles'
+--output_file './pycytominer_output/output.csv'
+--output_type 'csv'
+--operation "${', '.join($operation)}"
+
+&& cp './pycytominer_output/output.csv' '$output'
+
+
+    ]]></command>
+    <inputs>
+        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after normalization"/>
+        <param name="operation"
+            label="Select operations"
+            help="List of operation to apply to the cell-profiling table"
+            type="select"
+            multiple="true">
+        <option value="variance_threshold">Variance Threshold</option>
+        <option value="correlation_threshold">Correlation Threshold</option>
+        <option value="blocklist">Blocklist</option>
+        <option value="drop_na_columns">Drop NA Columns</option>
+        <option value="noise_removal">Noise Removal</option>
+    </param>
+    </inputs>
+    <outputs>
+        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="profiles" value="04_normalize_stand.csv" ftype="csv"/>
+            <param name="operation" value="variance_threshold,blocklist"/>
+            <output name="output" file="05_feature_selected.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_columns n="17" sep=","/>
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+    **What it does**
+
+    **Pycytominer Feature Select** removes uninformative features. Multiple operations can be applied in one call by passing a comma-delimited list.
+
+    - **Variance Threshold**, drop near-constant features
+
+    - **Correlation Threshold**, drop one of each highly correlated pair
+
+    - **Blocklist**, drop features known to be unreliable across assays
+
+    - **Drop NA Columns**, drop columns with too many missing values
+
+    - **Noise Removal**, remove features with low signal-to-noise ratio
+
+    Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+
+    ]]></help>
+    <citations>
+        <citation type="doi">10.1186/s13059-023-03019-3</citation>
+    </citations>
+</tool>

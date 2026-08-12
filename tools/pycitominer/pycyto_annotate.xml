@@ -1,0 +1,78 @@
+<tool id="pycytominer_annotate" name="Annotate" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+    <description>with Pycytominer</description>
+    <macros>
+        <import>creators.xml</import>
+        <token name="@TOOL_VERSION@">1.6.1</token>
+        <token name="@VERSION_SUFFIX@">0</token>
+    </macros>
+    <creator>
+        <expand macro="creators/rmassei"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="1.6.1">pycytominer</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+mkdir pycytominer_output &&
+
+## Since the profiles and platemat headers are input as integers, they need to be converted in a a string
+columns_headers1=`head -n1 "$profiles" | cut -d, -f'$profiles_joiner'` &&
+columns_headers2=`head -n1 "$platemap" | cut -d, -f'$platemap_joiner'` &&
+    
+pycytominer annotate
+
+--profiles '$profiles'
+--output_file './pycytominer_output/output.csv'
+--output_type 'csv'
+--platemap '$platemap'
+## "Metadata_" need to be add in front of the platemap header name to be read as input
+--join_on "Metadata_\$columns_headers2, \$columns_headers1"
+
+&& cp './pycytominer_output/output.csv' '$output'
+
+
+    ]]></command>
+    <inputs>
+        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
+        <param name="profiles_joiner" type="data_column"  format="csv" 
+            label="Column describing the wells"
+            help="Column with well values in the cell-profiling table (i.e. Metadata_Well)"
+            data_ref="profiles" 
+            use_header_names="true" />
+        <param name="platemap" type="data" format="csv" label="Input platemap table" help= "Table with platempa information such a treatment, celline and concentration tested"/>
+        <param name="platemap_joiner" type="data_column"  format="csv" 
+            label="Column describing the wells"
+            help="Column with well values in the platemap (i.e. Metadata_well_position)"
+            data_ref="platemap" 
+            use_header_names="true"/>
+    </inputs>
+    <outputs>
+        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="profiles" value="01_single_cells.csv" ftype="csv"/>
+            <param name="platemap" value="01_platemap.csv" ftype="csv"/>
+            <param name="profiles_joiner" value="2"/>
+            <param name="platemap_joiner" value="1"/>
+            <output name="output" file="03_annotate_plate.csv" ftype="csv">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_text text="Metadata_treatment"/>
+                    <has_n_columns n="18" sep=","/>
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+    **What it does**
+
+    **Pycytominer annotate** joins a plate map file onto the well profiles, adding columns such as treatment, cell line, and concentration. 
+    The plate map is a CSV (or any tabular format) where each row describes one well.
+
+    Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+
+    ]]></help>
+    <citations>
+        <citation type="doi">10.1186/s13059-023-03019-3</citation>
+    </citations>
+</tool>
