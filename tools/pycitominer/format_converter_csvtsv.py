@@ -19,4 +19,3 @@ for infile, outfile in zip(args.input, args.output):
         writer = csv.writer(fout, delimiter=DELIMS[dst])
         for row in csv.reader(fin, delimiter=DELIMS[src]):
             writer.writerow(row)
-            
