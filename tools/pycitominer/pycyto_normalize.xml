@@ -8,17 +8,30 @@
     <creator>
         <expand macro="creators/rmassei"/>
     </creator>
+    <edam_operations>
+        <edam_operation>operation_3443</edam_operation>
+    </edam_operations>
     <requirements>
         <requirement type="package" version="1.6.1">pycytominer</requirement>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
 mkdir pycytominer_output &&
 
+## Convert the input to CSV for pycytominer
+#if $profiles.ext in ["tsv", "tabular"]
+    python '$__tool_directory__/format_converter_csvtsv.py'
+        -i '$profiles'
+        -o 'profiles.csv'
+        -c tsv2csv &&
+#else
+    cp '$profiles' 'profiles.csv' &&
+#end if
+
 ## Since the strata are input as integers, they need to be converted in a a comma separated string
-columns_headers=`head -n1 "$profiles" | cut -d, -f'$column'` &&
+columns_headers=`head -n1 'profiles.csv' | cut -d, -f'$column'` &&
 
 pycytominer normalize
---profiles '$profiles'
+--profiles 'profiles.csv'
 --output_file './pycytominer_output/output.csv'
 --output_type 'csv'
 #if str($treatment) != 'all'
@@ -26,15 +39,17 @@ pycytominer normalize
 #else
     --samples 'all'
 #end if
---method '$method'
+--method '$method' &&
 
-&& cp './pycytominer_output/output.csv' '$output'
-
-
+## Convert the result back to TSV for the Galaxy dataset
+python '$__tool_directory__/format_converter_csvtsv.py'
+    -i 'pycytominer_output/output.csv'
+    -o '$output'
+    -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after annotation with treatments"/>
-        <param name="column" type="data_column"  format="csv" 
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after annotation with treatments"/>
+        <param name="column" type="data_column"  format="csv,tsv,tabular" 
             label="Column with normalization values"
             help="Column containing the values to use for normalized (i.e. Metadata_treatment)"
             data_ref="profiles" 
@@ -48,30 +63,58 @@ pycytominer normalize
         </param>
     </inputs>
     <outputs>
-        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+        <data name="output" format="tabular" label="Pycytominer ${tool.name} on ${on_string}"/>
     </outputs>
     <tests>
         <test>
+        <!-- TEST WITH CSV INPUT -->
             <param name="profiles" value="03_annotate_plate.csv" ftype="csv"/>
             <param name="column" value="1"/>
             <param name="treatment" value="DMSO"/>
             <param name="method" value="standardize"/>
-            <output name="output" file="04_normalize_stand.csv" ftype="csv">
+            <output name="output" file="04_normalize_stand.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_Well"/>
-                    <has_n_columns n="18" sep=","/>
+                    <has_n_columns n="18"/>
                 </assert_contents>
             </output>
         </test>
         <test>
+        <!-- TEST WITH CSV INPUT -->
             <param name="profiles" value="03_annotate_plate.csv" ftype="csv"/>
             <param name="column" value="1"/>
             <param name="treatment" value="all"/>
             <param name="method" value="standardize"/>
-            <output name="output" file="04_normalize_all.csv" ftype="csv">
+            <output name="output" file="04_normalize_all.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_Well"/>
-                    <has_n_columns n="18" sep=","/>
+                    <has_n_columns n="18"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test>
+        <!-- TEST WITH TSV INPUT -->
+            <param name="profiles" value="03_annotate_plate.tsv" ftype="tsv"/>
+            <param name="column" value="1"/>
+            <param name="treatment" value="DMSO"/>
+            <param name="method" value="standardize"/>
+            <output name="output" file="04_normalize_stand_2.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_columns n="18"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test>
+        <!-- TEST WITH TSV INPUT -->
+            <param name="profiles" value="03_annotate_plate.tsv" ftype="tsv"/>
+            <param name="column" value="1"/>
+            <param name="treatment" value="all"/>
+            <param name="method" value="standardize"/>
+            <output name="output" file="04_normalize_all_2.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_columns n="18"/>
                 </assert_contents>
             </output>
         </test>

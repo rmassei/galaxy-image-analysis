@@ -8,57 +8,88 @@
     <creator>
         <expand macro="creators/rmassei"/>
     </creator>
+    <edam_operations>
+        <edam_operation>operation_3443</edam_operation>
+    </edam_operations>
     <requirements>
         <requirement type="package" version="1.6.1">pycytominer</requirement>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
 mkdir pycytominer_output &&
 
+## Convert the input and the platemap to CSV for pycytominer
+#if $profiles.ext in ["tsv", "tabular"]
+    python '$__tool_directory__/format_converter_csvtsv.py'
+        -i '$profiles' '$platemap'
+        -o 'profiles.csv' 'platemap.csv'
+        -c tsv2csv &&
+#else
+    cp '$profiles' 'profiles.csv' &&
+    cp '$platemap' 'platemap.csv' &&
+#end if
+
 ## Since the profiles and platemat headers are input as integers, they need to be converted in a a string
-columns_headers1=`head -n1 "$profiles" | cut -d, -f'$profiles_joiner'` &&
-columns_headers2=`head -n1 "$platemap" | cut -d, -f'$platemap_joiner'` &&
+columns_headers1=`head -n1 'profiles.csv' | cut -d, -f'$profiles_joiner'` &&
+columns_headers2=`head -n1 'platemap.csv' | cut -d, -f'$platemap_joiner'` &&
     
 pycytominer annotate
 
---profiles '$profiles'
+--profiles 'profiles.csv'
 --output_file './pycytominer_output/output.csv'
 --output_type 'csv'
---platemap '$platemap'
+--platemap 'platemap.csv'
 ## "Metadata_" need to be add in front of the platemap header name to be read as input
---join_on "Metadata_\$columns_headers2, \$columns_headers1"
+--join_on "Metadata_\$columns_headers2, \$columns_headers1" &&
 
-&& cp './pycytominer_output/output.csv' '$output'
-
-
+## Convert the result back to TSV for the Galaxy dataset
+python '$__tool_directory__/format_converter_csvtsv.py'
+    -i 'pycytominer_output/output.csv'
+    -o '$output'
+    -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
-        <param name="profiles_joiner" type="data_column"  format="csv" 
+        <param name="profiles" type="data"  format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
+        <param name="profiles_joiner" type="data_column"   format="csv,tsv,tabular" 
             label="Column describing the wells"
             help="Column with well values in the cell-profiling table (i.e. Metadata_Well)"
             data_ref="profiles" 
             use_header_names="true" />
-        <param name="platemap" type="data" format="csv" label="Input platemap table" help= "Table with platempa information such a treatment, celline and concentration tested"/>
-        <param name="platemap_joiner" type="data_column"  format="csv" 
+        <param name="platemap" type="data"  format="csv,tsv,tabular" label="Input platemap table" help= "Table with platempa information such a treatment, celline and concentration tested"/>
+        <param name="platemap_joiner" type="data_column"   format="csv, tsv, tabular" 
             label="Column describing the wells"
-            help="Column with well values in the platemap (i.e. Metadata_well_position)"
+            help="Column with well values in the platemap (well_position)"
             data_ref="platemap" 
             use_header_names="true"/>
     </inputs>
     <outputs>
-        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+        <data name="output" format="tabular" label="Pycytominer ${tool.name} on ${on_string}"/>
     </outputs>
     <tests>
         <test>
+            <!-- TEST WITH CSV INPUT -->
             <param name="profiles" value="01_single_cells.csv" ftype="csv"/>
             <param name="platemap" value="01_platemap.csv" ftype="csv"/>
             <param name="profiles_joiner" value="2"/>
             <param name="platemap_joiner" value="1"/>
-            <output name="output" file="03_annotate_plate.csv" ftype="csv">
+            <output name="output" file="03_annotate_plate.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_Well"/>
                     <has_text text="Metadata_treatment"/>
-                    <has_n_columns n="18" sep=","/>
+                    <has_n_columns n="18"/>
+                </assert_contents>
+            </output>
+        </test>
+            <test>
+            <!-- TEST WITH TSV INPUT -->
+            <param name="profiles" value="01_single_cells.tsv" ftype="tsv"/>
+            <param name="platemap" value="01_platemap.tsv" ftype="tsv"/>
+            <param name="profiles_joiner" value="2"/>
+            <param name="platemap_joiner" value="1"/>
+            <output name="output" file="03_annotate_plate.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_text text="Metadata_treatment"/>
+                    <has_n_columns n="18"/>
                 </assert_contents>
             </output>
         </test>

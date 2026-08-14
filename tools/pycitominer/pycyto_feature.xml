@@ -8,25 +8,40 @@
     <creator>
         <expand macro="creators/rmassei"/>
     </creator>
+    <edam_operations>
+        <edam_operation>operation_3443</edam_operation>
+    </edam_operations>
     <requirements>
         <requirement type="package" version="1.6.1">pycytominer</requirement>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
 mkdir pycytominer_output &&
+
+## Convert the input to CSV for pycytominer
+#if $profiles.ext in ["tsv", "tabular"]
+    python '$__tool_directory__/format_converter_csvtsv.py'
+        -i '$profiles'
+        -o 'profiles.csv'
+        -c tsv2csv &&
+#else
+    cp '$profiles' 'profiles.csv' &&
+#end if
     
 pycytominer feature_select
 
---profiles '$profiles'
+--profiles 'profiles.csv'
 --output_file './pycytominer_output/output.csv'
 --output_type 'csv'
---operation "${', '.join($operation)}"
+--operation "${', '.join($operation)}" &&
 
-&& cp './pycytominer_output/output.csv' '$output'
-
-
+## Convert the result back to TSV for the Galaxy dataset
+python '$__tool_directory__/format_converter_csvtsv.py'
+    -i 'pycytominer_output/output.csv'
+    -o '$output'
+    -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after normalization"/>
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after normalization"/>
         <param name="operation"
             label="Select operations"
             help="List of operation to apply to the cell-profiling table"
@@ -40,16 +55,28 @@ pycytominer feature_select
     </param>
     </inputs>
     <outputs>
-        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+        <data name="output" format="tabular" label="Pycytominer ${tool.name} on ${on_string}"/>
     </outputs>
     <tests>
         <test>
+        <!-- TEST WITH CSV INPUT -->
             <param name="profiles" value="04_normalize_stand.csv" ftype="csv"/>
             <param name="operation" value="variance_threshold,blocklist"/>
-            <output name="output" file="05_feature_selected.csv" ftype="csv">
+            <output name="output" file="05_feature_selected.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_Well"/>
-                    <has_n_columns n="17" sep=","/>
+                    <has_n_columns n="17"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test>
+        <!-- TEST WITH TSV INPUT -->
+            <param name="profiles" value="04_normalize_stand_2.tsv" ftype="tsv"/>
+            <param name="operation" value="variance_threshold,blocklist"/>
+            <output name="output" file="05_feature_selected_2.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text text="Metadata_Well"/>
+                    <has_n_columns n="17"/>
                 </assert_contents>
             </output>
         </test>

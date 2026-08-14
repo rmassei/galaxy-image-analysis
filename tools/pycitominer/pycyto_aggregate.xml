@@ -8,27 +8,44 @@
     <creator>
         <expand macro="creators/rmassei"/>
     </creator>
+    <edam_operations>
+        <edam_operation>operation_3443</edam_operation>
+    </edam_operations>
     <requirements>
         <requirement type="package" version="1.6.1">pycytominer</requirement>
     </requirements>
-    <command detect_errors="exit_code"><![CDATA[
-mkdir pycytominer_output &&
+<command><![CDATA[
+mkdir -p pycytominer_output &&
 
-## Since the strata headers are input as integers, they need to be converted in a a comma separated string
-columns_headers=`head -n1 "$profiles" | cut -d, -f"$strata"` &&
+## Convert the input to CSV for pycytominer
+#if $profiles.ext in ["tsv", "tabular"]
+    python '$__tool_directory__/format_converter_csvtsv.py'
+        -i '$profiles'
+        -o 'profiles.csv'
+        -c tsv2csv &&
+#else
+    cp '$profiles' 'profiles.csv' &&
+#end if
+
+## The strata parameter is a list of column indices; resolve them to header names
+strata_headers=\$(head -n1 'profiles.csv' | cut -d, -f'$strata') &&
 
 pycytominer aggregate
---profiles '$profiles'
---output_file './pycytominer_output/output.csv'
---output_type 'csv'
---strata "\$columns_headers"
---operation '$operation'
+    --profiles 'profiles.csv'
+    --output_file 'pycytominer_output/output.csv'
+    --output_type 'csv'
+    --strata "\$strata_headers"
+    --operation '$operation' &&
 
-&& cp './pycytominer_output/output.csv' '$output'
-    ]]></command>
+## Convert the result back to TSV for the Galaxy dataset
+python '$__tool_directory__/format_converter_csvtsv.py'
+    -i 'pycytominer_output/output.csv'
+    -o '$output'
+    -c csv2tsv
+]]></command>
     <inputs>
-    <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
-    <param name="strata" type="data_column" format="csv"
+    <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
+    <param name="strata" type="data_column" format="csv,tsv,tabular"
         label="Aggregation columns"
         help="Select column names to aggregate by (i.e. Metadata_Plate, Metadata_Well)"
         data_ref="profiles" 
@@ -40,14 +57,15 @@ pycytominer aggregate
     </param>
     </inputs>
     <outputs>
-        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+        <data name="output" format="tabular" label="Pycytominer ${tool.name} on ${on_string}"/>
     </outputs>
     <tests>
         <test>
-            <param name="profiles" value="01_single_cells.csv" ftype="csv"/>
+            <!-- TEST WITH TSV INPUT -->
+            <param name="profiles" value="01_single_cells.tsv" ftype="tsv"/>
             <param name="strata" value="1,2"/>
             <param name="operation" value="median"/>
-            <output name="output" file="02_aggregate_median.csv" ftype="csv">
+            <output name="output" file="02_aggregate_median.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_Well"/>
                     <has_n_lines n="7"/>
@@ -55,10 +73,11 @@ pycytominer aggregate
             </output>
         </test>
         <test>
+            <!-- TEST WITH CSV INPUT -->
             <param name="profiles" value="01_single_cells.csv" ftype="csv"/>
             <param name="strata" value="1,2"/>
             <param name="operation" value="mean"/>
-                        <output name="output" file="02_aggregate_mean.csv" ftype="csv">
+            <output name="output" file="02_aggregate_mean.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_Plate"/>
                     <has_n_lines n="7"/>

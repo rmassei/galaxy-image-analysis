@@ -8,29 +8,45 @@
     <creator>
         <expand macro="creators/rmassei"/>
     </creator>
+    <edam_operations>
+        <edam_operation>operation_3443</edam_operation>
+    </edam_operations>
     <requirements>
         <requirement type="package" version="1.6.1">pycytominer</requirement>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
 mkdir pycytominer_output &&
 
+## Convert the input to CSV for pycytominer
+#if $profiles.ext in ["tsv", "tabular"]
+    python '$__tool_directory__/format_converter_csvtsv.py'
+        -i '$profiles'
+        -o 'profiles.csv'
+        -c tsv2csv &&
+#else
+    cp '$profiles' 'profiles.csv' &&
+#end if
+
 ## Since the strata are input as integers, they need to be converted in a a comma separated string
-columns_headers=`head -n1 "$profiles" | cut -d, -f'$replicate_columns'` &&
+columns_headers=`head -n1 'profiles.csv' | cut -d, -f'$replicate_columns'` &&
     
 pycytominer consensus
 
---profiles '$profiles'
+--profiles 'profiles.csv'
 --output_file './pycytominer_output/output.csv'
 --output_type 'csv'
 --operation '$operation'
---replicate_columns "\$columns_headers"
+--replicate_columns "\$columns_headers" &&
 
-&& cp './pycytominer_output/output.csv' '$output'
-
+## Convert the result back to TSV for the Galaxy dataset
+python '$__tool_directory__/format_converter_csvtsv.py'
+    -i 'pycytominer_output/output.csv'
+    -o '$output'
+    -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after feature selection"/>
-        <param name="replicate_columns" type="data_column"  format="csv" 
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after feature selection"/>
+        <param name="replicate_columns" type="data_column" format="csv,tsv,tabular" 
             label="Column with unique condition"
             help="Select column with the unique condition, meaning where replicates share all of these values"
             multiple="true"
@@ -46,14 +62,27 @@ pycytominer consensus
     </param>
     </inputs>
     <outputs>
-        <data name="output" format="csv" label="Pycytominer ${tool.name} on ${on_string}"/>
+        <data name="output" format="tabular" label="Pycytominer ${tool.name} on ${on_string}"/>
     </outputs>
     <tests>
         <test>
+        <!-- TEST WITH CSV INPUT -->
             <param name="profiles" value="05_feature_selected.csv" ftype="csv"/>
             <param name="replicate_columns" value="1,2,3"/>
             <param name="operation" value="median"/>
-            <output name="output" file="06_consensus.csv" ftype="csv">
+            <output name="output" file="06_consensus.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text text="Metadata_treatment"/>
+                    <has_n_lines n="4"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test>
+        <!-- TEST WITH TSV INPUT -->
+            <param name="profiles" value="05_feature_selected.tsv" ftype="tsv"/>
+            <param name="replicate_columns" value="1,2,3"/>
+            <param name="operation" value="median"/>
+            <output name="output" file="06_consensus_2.tsv" ftype="tabular">
                 <assert_contents>
                     <has_text text="Metadata_treatment"/>
                     <has_n_lines n="4"/>
