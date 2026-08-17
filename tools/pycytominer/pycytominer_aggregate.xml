@@ -1,23 +1,10 @@
 <tool id="pycytominer_aggregate" name="Aggregate" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
     <description>with Pycytominer</description>
     <macros>
-        <import>creators.xml</import>
-        <token name="@TOOL_VERSION@">1.6.1</token>
-        <token name="@VERSION_SUFFIX@">0</token>
+        <import>macros.xml</import>
     </macros>
-    <creator>
-        <expand macro="creators/rmassei"/>
-    </creator>
-    <edam_operations>
-        <edam_operation>operation_3443</edam_operation>
-    </edam_operations>
-    <requirements>
-        <requirement type="package" version="1.6.1">pycytominer</requirement>
-    </requirements>
-    <required_files>
-        <include type="literal" path="format_converter_csvtsv.py"/>
-    </required_files>
-<command><![CDATA[
+    <expand macro="header"/>
+    <command><![CDATA[
 mkdir -p pycytominer_output &&
 
 ## Convert the input to CSV for pycytominer
@@ -45,7 +32,7 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     -i 'pycytominer_output/output.csv'
     -o '$output'
     -c csv2tsv
-]]></command>
+    ]]></command>
     <inputs>
     <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
     <param name="strata" type="data_column" format="csv,tsv,tabular"
@@ -98,7 +85,5 @@ taking the median (or mean) of each feature across all cells in that well.
 Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
 
     ]]></help>
-    <citations>
-        <citation type="doi">10.1186/s13059-023-03019-3</citation>
-    </citations>
+    <expand macro="footer"/>
 </tool>
