@@ -1,22 +1,9 @@
 <tool id="pycytominer_annotate" name="Annotate" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
     <description>with Pycytominer</description>
     <macros>
-        <import>creators.xml</import>
-        <token name="@TOOL_VERSION@">1.6.1</token>
-        <token name="@VERSION_SUFFIX@">0</token>
+        <import>macros.xml</import>
     </macros>
-    <creator>
-        <expand macro="creators/rmassei"/>
-    </creator>
-    <edam_operations>
-        <edam_operation>operation_3443</edam_operation>
-    </edam_operations>
-    <requirements>
-        <requirement type="package" version="1.6.1">pycytominer</requirement>
-    </requirements>
-    <required_files>
-        <include type="literal" path="format_converter_csvtsv.py"/>
-    </required_files>
+    <expand macro="header"/>
     <command detect_errors="exit_code"><![CDATA[
 mkdir pycytominer_output &&
 
@@ -106,7 +93,5 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
 
     ]]></help>
-    <citations>
-        <citation type="doi">10.1186/s13059-023-03019-3</citation>
-    </citations>
+    <expand macro="footer"/>
 </tool>
