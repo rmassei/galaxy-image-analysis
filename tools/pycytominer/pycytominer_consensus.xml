@@ -1,4 +1,4 @@
-<tool id="pycytominer_consensus" name="Consensus" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+<tool id="pycytominer_consensus" name="Compute consensus profiles" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
     <description>with Pycytominer</description>
     <macros>
         <import>macros.xml</import>

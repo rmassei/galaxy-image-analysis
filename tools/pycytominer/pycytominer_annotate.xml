@@ -1,4 +1,4 @@
-<tool id="pycytominer_annotate" name="Annotate" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+<tool id="pycytominer_annotate" name="Annotate readouts with metadata" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
     <description>with Pycytominer</description>
     <macros>
         <import>macros.xml</import>
@@ -87,7 +87,7 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     <help><![CDATA[
     **What it does**
 
-    **Pycytominer annotate** joins a plate map file onto the well profiles, adding columns such as treatment, cell line, and concentration. 
+    **Pycytominer annotate** joins a metadata file (i.e. plate map) onto the well profiles, adding columns such as treatment, cell line, and concentration. 
     The plate map is a CSV (or any tabular format) where each row describes one well.
 
     Documentation: https://pycytominer.readthedocs.io/en/stable/index.html

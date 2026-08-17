@@ -1,4 +1,4 @@
-<tool id="pycytominer_normalize" name="Normalize" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
+<tool id="pycytominer_normalize" name="Normalize readouts" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="23.0">
     <description>with Pycytominer</description>
     <macros>
         <import>macros.xml</import>
@@ -112,8 +112,8 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     <help><![CDATA[
     **What it does**
 
-    **Pycytominer normalize** scales features to a common range and limits plate-to-plate technical variation. 
-    Z-scoring against DMSO control wells is the most common approach.
+    **Pycytominer normalize** scales features to a common range and limits replicates (i.e. plate-to-plate) technical variation. 
+    In cell painting, Z-scoring against DMSO control wells is the most common approach.
 
     - Use **all** to normalize against the entire plate
 
