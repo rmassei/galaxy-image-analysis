@@ -31,12 +31,13 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help="Table with features extracted from biological images, normally after normalization"/>
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input feature-readouts table" help="Table with features extracted from images, normally after normalization"/>
         <param name="operation"
             label="Operations"
-            help="Operations to apply to the cell-profiling table for removal of uninformative features."
+            help="Operations to apply to the feature-readouts table for removal of uninformative features."
             type="select"
-            multiple="true">
+            multiple="true"
+            optional="false">
         <option value="variance_threshold">Variance Threshold</option>
         <option value="correlation_threshold">Correlation Threshold</option>
         <option value="blocklist">Blocklist</option>

@@ -35,7 +35,7 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help="Table with features extracted from biological images, normally after feature selection"/>
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input feature-readouts table" help="Table with features extracted from images, normally after feature selection"/>
         <param name="replicate_columns" type="data_column" format="csv,tsv,tabular" 
             label="Column with unique condition"
             help="Select column with the unique condition, meaning where replicates share all of these values"

@@ -38,15 +38,15 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table"help= "Table with features extracted from biological images"/>
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input feature-readouts table" help= "Table with features extracted from images"/>
         <param name="profiles_joiner" type="data_column" format="csv,tsv,tabular" 
-            label="Column describing the wells"
+            label="Column describing the wells in the feature-readouts table"
             help="Column with well values in the cell-profiling table (e.g., Metadata_Well)"
             data_ref="profiles" 
             use_header_names="true" />
         <param name="platemap" type="data" format="csv,tsv,tabular" label="Input platemap table" help="Table with plate map information such a treatment, cell line, and concentration tested"/>
         <param name="platemap_joiner" type="data_column" format="csv,tsv,tabular" 
-            label="Column describing the wells"
+            label="Column describing the wells in the platemap"
             help="Column with well values in the platemap (well_position)"
             data_ref="platemap" 
             use_header_names="true"/>
