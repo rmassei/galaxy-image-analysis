@@ -44,8 +44,8 @@ python '$__tool_directory__/format_converter_csvtsv.py'
             use_header_names="true"/>
         <param name="operation"
             type="select"
-            label="Select operations"
-            help="List of operation to apply to the cell-profiling table">
+            label="Reduction operation"
+            help="Operation to apply to the cell-profiling table. &lt;i&gt;Moderated z-score&lt;/i&gt; is recommended for large screens.">
         <option value="median">Median</option>
         <option value="mean">Mean</option>
         <option value="modz">Moderated z-score</option>
@@ -82,11 +82,11 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     </tests>
     <help><![CDATA[
 
-    **What it does**
+**Collapses replicate wells into one profile per biological condition.**
 
-    **Pycytominer consensus** collapses replicate wells into one profile per biological condition by taking the median (or modz) across replicates.
-    
-    - **median**, **mean**, or **Moderated z-score** (recommended for large screens)
+The replicate wells are collapsed by the *Reduction operation* across replicates.
+
+Documentation: https://pycytominer.readthedocs.io/en/stable/walkthroughs/pycytominer_cli.html#Step-5:-Consensus
 
 
     ]]></help>

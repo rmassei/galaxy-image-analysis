@@ -33,8 +33,8 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     <inputs>
         <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after normalization"/>
         <param name="operation"
-            label="Select operations"
-            help="List of operation to apply to the cell-profiling table"
+            label="Operations"
+            help="Operations to apply to the cell-profiling table for removal of uninformative features."
             type="select"
             multiple="true">
         <option value="variance_threshold">Variance Threshold</option>
@@ -72,21 +72,22 @@ python '$__tool_directory__/format_converter_csvtsv.py'
         </test>
     </tests>
     <help><![CDATA[
-    **What it does**
 
-    **Pycytominer Feature Select** removes uninformative features. Multiple operations can be applied in one call by passing a comma-delimited list.
+**Removes uninformative features.**
 
-    - **Variance Threshold**, drop near-constant features
+Multiple operations for removal of uninformative features can be applied in one call:
 
-    - **Correlation Threshold**, drop one of each highly correlated pair
+- **Variance Threshold:** drop near-constant features
 
-    - **Blocklist**, drop features known to be unreliable across assays
+- **Correlation Threshold:** drop one of each highly correlated pair
 
-    - **Drop NA Columns**, drop columns with too many missing values
+- **Blocklist:** drop features known to be unreliable across assays
 
-    - **Noise Removal**, remove features with low signal-to-noise ratio
+- **Drop NA Columns:** drop columns with too many missing values
 
-    Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+- **Noise Removal:** remove features with low signal-to-noise ratio
+
+Documentation: https://pycytominer.readthedocs.io/en/stable/walkthroughs/pycytominer_cli.html#Step-4:-Feature-Select
 
     ]]></help>
     <expand macro="footer"/>
