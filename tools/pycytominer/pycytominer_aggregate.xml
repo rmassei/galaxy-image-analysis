@@ -34,10 +34,10 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     -c csv2tsv
     ]]></command>
     <inputs>
-    <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images"/>
+    <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help="Table with features extracted from biological images"/>
     <param name="strata" type="data_column" format="csv,tsv,tabular"
         label="Aggregation columns"
-        help="Select column names to aggregate by (i.e. Metadata_Plate, Metadata_Well)"
+        help="Select column names to aggregate by (e.g., Metadata_Plate, Metadata_Well)"
         data_ref="profiles" 
         multiple="true" 
         use_header_names="true"/>

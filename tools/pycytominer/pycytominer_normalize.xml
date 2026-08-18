@@ -38,10 +38,10 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     -c csv2tsv
     ]]></command>
     <inputs>
-        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help= "Table with features extracted from biological images, normally after annotation with treatments"/>
-        <param name="column" type="data_column"  format="csv,tsv,tabular" 
+        <param name="profiles" type="data" format="csv,tsv,tabular" label="Input cell-profiling table" help="Table with features extracted from biological images, normally after annotation with treatments"/>
+        <param name="column" type="data_column" format="csv,tsv,tabular" 
             label="Column with normalization values"
-            help="Column containing the values to use for normalized (i.e. Metadata_treatment)"
+            help="Column containing the values to use for normalized (e.g., Metadata_treatment)"
             data_ref="profiles" 
             use_header_names="true"/>
         <param name="treatment" type="text" label="Value" help="Wich value to use for normalized (i.e. DMSO, Control)"/>
