@@ -44,8 +44,9 @@ python '$__tool_directory__/format_converter_csvtsv.py'
             help="Column containing the values to use for normalized (e.g., Metadata_treatment)"
             data_ref="profiles" 
             use_header_names="true"/>
-        <param name="treatment" type="text" label="Value" help="Wich value to use for normalized (i.e. DMSO, Control)"/>
-        <param name="method" type="select" label="Normalization Method">
+        <param name="treatment" type="text" label="Value"
+            help="Normalization reference (e.g., &lt;tt&gt;DMSO&lt;/tt&gt;, &lt;tt&gt;Control&lt;/tt&gt;). In cell painting, Z-scoring against &lt;tt&gt;DMSO&lt;/tt&gt; control wells is the most common approach. Use &lt;tt&gt;all&lt;/tt&gt; to normalize against the entire plate."/>
+        <param name="method" type="select" label="Normalization method">
             <option value="standardize" selected="true">Standardize</option>
             <option value="robustize">Robustize</option>
             <option value="spherize">Spherize</option>
@@ -110,16 +111,10 @@ python '$__tool_directory__/format_converter_csvtsv.py'
         </test>
     </tests>
     <help><![CDATA[
-    **What it does**
 
-    **Pycytominer normalize** scales features to a common range and limits replicates (i.e. plate-to-plate) technical variation. 
-    In cell painting, Z-scoring against DMSO control wells is the most common approach.
+**Scales readouts to a common range and limits plate-to-plate technical variation.**
 
-    - Use **all** to normalize against the entire plate
-
-    - **Normalization method:** standardize (z-score, default), robustize (MAD-based), or spherize
-
-    Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+Documentation: https://pycytominer.readthedocs.io/en/stable/walkthroughs/pycytominer_cli.html#Step-3:-Normalize
 
     ]]></help>
     <expand macro="footer"/>

@@ -85,12 +85,12 @@ python '$__tool_directory__/format_converter_csvtsv.py'
         </test>
     </tests>
     <help><![CDATA[
-    **What it does**
 
-    **Pycytominer annotate** joins a metadata file (i.e. plate map) onto the well profiles, adding columns such as treatment, cell line, and concentration. 
-    The plate map is a CSV (or any tabular format) where each row describes one well.
+**Joins a metadata file (plate map) onto the well profiles, adding columns such as treatment, cell line, and concentration.**
 
-    Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+The plate map is a CSV (or any tabular format) where each row describes one well.
+
+Documentation: https://pycytominer.readthedocs.io/en/stable/walkthroughs/pycytominer_cli.html#Step-2:-Annotate
 
     ]]></help>
     <expand macro="footer"/>

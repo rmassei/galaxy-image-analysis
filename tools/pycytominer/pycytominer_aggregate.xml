@@ -77,12 +77,11 @@ python '$__tool_directory__/format_converter_csvtsv.py'
     </tests>
     <help><![CDATA[
 
-**What it does**
+**Collapses single-cell readouts (rows) into one representative profile per well.**
 
-**Pycytominer aggregate** collapses single-cell rows into one representative profile per well by 
-taking the median (or mean) of each feature across all cells in that well.
+The readouts (rows) are collapsed by taking the median (or mean) of each feature across all cells in that well.
 
-Documentation: https://pycytominer.readthedocs.io/en/stable/index.html
+Documentation: https://pycytominer.readthedocs.io/en/stable/walkthroughs/pycytominer_cli.html#Step-1:-Aggregate
 
     ]]></help>
     <expand macro="footer"/>
